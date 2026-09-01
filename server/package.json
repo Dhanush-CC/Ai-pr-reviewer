@@ -12,8 +12,10 @@
   "dependencies": {
     "@langchain/core": "^1.2.9",
     "@langchain/google-genai": "^2.3.0",
+    "bullmq": "^6.3.2",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "ioredis": "^6.0.0",
     "mongoose": "^9.9.4",
     "octokit": "^5.0.5",
     "zod": "^4.4.3"
