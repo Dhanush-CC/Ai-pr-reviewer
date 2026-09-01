@@ -1,0 +1,16 @@
+{
+  "name": "ai-pr-reviewer",
+  "version": "1.0.0",
+  "description": "AI PR Reviewer - Full stack application",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix frontend\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix server && npm run build --prefix frontend",
+    "install:all": "npm install && npm install --prefix server && npm install --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.2"
+  }
+}
