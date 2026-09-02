@@ -1,10 +1,10 @@
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
+import { authOptions } from "../auth/[...nextauth]/route"; // Import the options
 
 export async function GET(req) {
-  // getServerSession requires the auth options if defined externally, 
-  // but works directly if NextAuth is configured as a catch-all locally.
-  const session = await getServerSession();
+  // Pass the options to successfully read the custom token
+  const session = await getServerSession(authOptions);
   
   if (!session || !session.accessToken) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

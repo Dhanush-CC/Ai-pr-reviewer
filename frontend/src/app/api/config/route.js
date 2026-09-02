@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import dbConnect from "@/lib/mongodb";
 import RepoConfig from "@/models/RepoConfig";
-
+import { authOptions } from "../auth/[...nextauth]/route";
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const repositoryId = searchParams.get("repositoryId");
@@ -21,7 +21,7 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
