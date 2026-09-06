@@ -1,12 +1,14 @@
 import { Queue } from 'bullmq';
-import Redis from 'ioredis';
+import IORedis from 'ioredis';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
-export const redisConnection = new Redis(process.env.REDIS_URL, {
+const redisConnection = new IORedis(process.env.REDIS_URL, {
   maxRetriesPerRequest: null,
 });
 
-export const prReviewQueue = new Queue('pr-review-queue', { 
+// CHANGED: Queue name updated to 'pr-review-v2'
+export const prReviewQueue = new Queue('pr-review-v2', { 
   connection: redisConnection 
 });

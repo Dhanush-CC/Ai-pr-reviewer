@@ -12,6 +12,7 @@
   "dependencies": {
     "@langchain/core": "^1.2.9",
     "@langchain/google-genai": "^2.3.0",
+    "@octokit/rest": "^22.0.1",
     "bullmq": "^6.3.2",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",

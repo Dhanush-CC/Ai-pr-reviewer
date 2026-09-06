@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const ReviewLogSchema = new mongoose.Schema({
   repositoryFullName: { 
@@ -32,4 +32,4 @@ const ReviewLogSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('ReviewLog', ReviewLogSchema);
+export const ReviewLog = mongoose.model('ReviewLog', ReviewLogSchema);

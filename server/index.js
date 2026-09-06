@@ -1,4 +1,3 @@
-// server/index.js
 import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -25,20 +24,28 @@ app.post('/api/webhooks/github', verifyGithubSignature, async (req, res) => {
     const action = payload.action;
     
     if (action === 'opened' || action === 'synchronize') {
+      // EXTRACTED: All 5 exact variables the worker expects
       const commitSha = payload.pull_request.head.sha; 
-      const repoFullName = payload.repository.full_name;
+      const repositoryFullName = payload.repository.full_name;
+      const owner = payload.repository.owner.login;
+      const repo = payload.repository.name;
       const prNumber = payload.pull_request.number;
 
       try {
-        // Idempotency check happens instantly
         const existingReview = await ReviewLedger.findOne({ commitSha });
         if (existingReview) {
           console.log(`⏭️  Skipping: Commit ${commitSha} was already reviewed.`);
           return res.status(200).send('Already processed');
         }
 
-        // Push to Redis and immediately respond to GitHub
-        await prReviewQueue.add('analyze-pr', { repoFullName, prNumber, commitSha });
+        // PASSED: The fully populated object to BullMQ
+        await prReviewQueue.add('analyze-pr', { 
+          repositoryFullName, 
+          owner, 
+          repo, 
+          prNumber, 
+          commitSha 
+        });
         
         console.log(`📥 Job queued for PR #${prNumber}`);
         return res.status(200).send('Webhook queued successfully');
