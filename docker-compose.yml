@@ -1,0 +1,48 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # 1. The Message Broker
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # 2. The Express Webhook Gateway
+  gateway:
+    build: ./server
+    command: node index.js
+    ports:
+      - "5500:5500"
+    env_file:
+      - ./server/.env
+    environment:
+      # Overrides the local localhost Redis URL with the Docker network URL
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # 3. The AI Job Processor
+  worker:
+    build: ./server
+    command: node worker.js
+    env_file:
+      - ./server/.env
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # 4. The Next.js Dashboard
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./frontend/.env.local # Or .env, depending on your Next.js setup
+    depends_on:
+      - gateway
+    restart: unless-stopped
