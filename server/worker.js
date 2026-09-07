@@ -11,7 +11,7 @@ import { ReviewLog } from "./models/ReviewLog.js";
 
 dotenv.config();
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const redisConnection = new IORedis(process.env.REDIS_URL, {
   maxRetriesPerRequest: null,
@@ -33,6 +33,8 @@ const worker = new Worker("pr-review-v2", async (job) => {
         config = { tone: "educational", focusAreas: ["logic", "performance", "security"] };
       }
       console.log(`🤖 Tone: ${config.tone} | Focus: ${config.focusAreas.join(", ")}`);
+      const tokenToUse = config.userAccessToken || process.env.GITHUB_TOKEN;
+      const octokit = new Octokit({ auth: tokenToUse });
 
       const diffResponse = await octokit.rest.pulls.get({
         owner,

@@ -1,9 +1,10 @@
+// src/app/dashboard/page.js
 "use client";
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import { Save, Loader2, GitBranch, Settings, Activity, CheckCircle, XCircle, MessageSquare } from "lucide-react";
+import { Save, Loader2, GitBranch, Settings, Activity, CheckCircle, XCircle, MessageSquare, Webhook } from "lucide-react";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -14,9 +15,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
-  // New state for Review Analytics
+  // Analytics state
   const [logs, setLogs] = useState([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
+
+  // Webhook setup state
+  const [settingUpWebhook, setSettingUpWebhook] = useState(false);
+  const [webhookStatus, setWebhookStatus] = useState(null);
 
   useEffect(() => {
     if (status === "unauthenticated") redirect("/");
@@ -36,8 +41,8 @@ export default function Dashboard() {
 
   const handleRepoSelect = async (repoFullName) => {
     setSelectedRepo(repoFullName);
+    setWebhookStatus(null);
     
-    // 1. Fetch AI Configuration
     try {
       const res = await fetch(`/api/config?repositoryId=${repoFullName}`);
       if (res.ok) {
@@ -49,7 +54,6 @@ export default function Dashboard() {
       console.error("Failed to fetch config", error);
     }
 
-    // 2. Fetch Review Logs
     setLoadingLogs(true);
     try {
       const logRes = await fetch(`/api/logs?repositoryId=${repoFullName}`);
@@ -75,6 +79,34 @@ export default function Dashboard() {
       console.error("Failed to save config", error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSetupWebhook = async () => {
+    if (!selectedRepo) return;
+    setSettingUpWebhook(true);
+    setWebhookStatus(null);
+
+    // selectedRepo is in the format "owner/repo"
+    const [owner, repo] = selectedRepo.split("/");
+
+    try {
+      const res = await fetch("/api/webhooks/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ owner, repo }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setWebhookStatus({ type: "success", text: data.message || "Webhook configured successfully!" });
+      } else {
+        setWebhookStatus({ type: "error", text: data.error || "Failed to setup webhook." });
+      }
+    } catch (error) {
+      setWebhookStatus({ type: "error", text: "Network error configuring webhook." });
+    } finally {
+      setSettingUpWebhook(false);
     }
   };
 
@@ -117,7 +149,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Right Column: Config & Analytics */}
+      {/* Right Column: Config & Webhook & Analytics */}
       <div className="md:col-span-2 space-y-6">
         {!selectedRepo ? (
           <div className="flex flex-col items-center justify-center border border-slate-800 bg-slate-900/50 rounded-xl h-[400px] text-slate-500 space-y-4">
@@ -128,10 +160,32 @@ export default function Dashboard() {
           <>
             {/* Configuration Panel */}
             <div className="border border-slate-800 bg-slate-900/50 rounded-xl p-6">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-white mb-2">{selectedRepo}</h2>
-                <p className="text-slate-400 text-sm">Configure how the AI behaves for this project.</p>
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-white mb-1">{selectedRepo}</h2>
+                  <p className="text-slate-400 text-sm">Configure how the AI behaves and activate the webhook.</p>
+                </div>
+                
+                {/* Automated Webhook Activation Button */}
+                <button
+                  onClick={handleSetupWebhook}
+                  disabled={settingUpWebhook}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm rounded-lg font-medium transition-colors"
+                >
+                  {settingUpWebhook ? <Loader2 className="w-4 h-4 animate-spin" /> : <Webhook className="w-4 h-4" />}
+                  Enable AI Review
+                </button>
               </div>
+
+              {webhookStatus && (
+                <div className={`mb-6 p-3 rounded-lg text-sm border ${
+                  webhookStatus.type === "success" 
+                    ? "bg-emerald-950/40 border-emerald-800 text-emerald-300" 
+                    : "bg-red-950/40 border-red-800 text-red-300"
+                }`}>
+                  {webhookStatus.text}
+                </div>
+              )}
 
               <div className="space-y-6">
                 <div className="space-y-3">
