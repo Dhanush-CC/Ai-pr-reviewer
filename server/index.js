@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { verifyGithubSignature } from './middleware/verifyGithubSignature.js';
 import { ReviewLedger } from './models/ReviewLedger.js';
 import { prReviewQueue } from './queue.js';
-
+import "./worker.js";
 dotenv.config();
 
 const app = express();
