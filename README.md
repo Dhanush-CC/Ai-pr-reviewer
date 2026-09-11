@@ -8,7 +8,7 @@ An event-driven, multi-tenant SaaS application that automatically reviews GitHub
 [![BullMQ](https://img.shields.io/badge/BullMQ-Message%20Queue-FF4F00?logo=redis)](https://docs.bullmq.io/)
 [![Gemini 1.5](https://img.shields.io/badge/Gemini_1.5-AI_Model-4285F4?logo=google)](https://deepmind.google/technologies/gemini/)
 
-> **🎥 Demo:** [Insert link to a 60-second Loom or GIF of the app working here]
+
 
 ## Key Features
 
